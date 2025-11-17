@@ -1,6 +1,6 @@
 import copy  # to make a deepcopy of the board
 from typing import List, Any, Tuple
-
+import time
 # import Stack and Queue classes for BFS/DFS
 from stack_and_queue import Stack, Queue
 
@@ -187,10 +187,16 @@ def DFS(state: Board) -> Board:
     """
     the_stack = Stack()
     the_stack.push(state)
-
+    iterations = 0  # ADD THIS LINE
+    start_time = time.time()  # ADD THIS LINE
+    
     while not the_stack.is_empty():
+        iterations += 1  # ADD THIS LINE
         currentBoard=the_stack.pop()
         if currentBoard.goal_test():
+            end_time = time.time()  # ADD THIS LINE
+            elapsed_time = end_time - start_time  # ADD THIS LINE
+            print(f"DFS took {iterations} iterations in {elapsed_time:.4f} seconds")
             return currentBoard
         if not (currentBoard.failure_test()):
             row,col = currentBoard.find_most_constrained_cell()
@@ -214,26 +220,27 @@ def BFS(state: Board) -> Board:
     Returns:
         either None in the case of invalid input or a solved board
     """
-    the_queue = Queue()
-    the_queue.push(state)
+    the_queue = Queue([state])
+    iterations = 0
+    start_time = time.time()
 
     while not the_queue.is_empty():
-        currentBoard = the_queue.pop()
-
-        if currentBoard.goal_test():
-            return currentBoard
-
-        if not currentBoard.failure_test():
-            row, col = currentBoard.find_most_constrained_cell()
-            possible_values = currentBoard.rows[row][col]
-
+        iterations += 1
+        current_board: Board = the_queue.pop()
+        if current_board.goal_test():
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print(f"BFS took {iterations} iterations in {elapsed_time: .4f} seconds")
+            return current_board
+        row, col = current_board.find_most_constrained_cell()
+        possible_values = current_board.rows[row][col]
+        if not current_board.failure_test():
             for val in possible_values:
-                newBoard: Board = copy.deepcopy(currentBoard)
-                newBoard.update(row, col, val)
-                the_queue.push(newBoard)
-    
-    return None
+                new_board = copy.deepcopy(current_board)
+                new_board.update(row, col, val)
+                the_queue.push(new_board)
 
+    return None
 
 
 if __name__ == "__main__":
